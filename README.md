@@ -4,15 +4,23 @@ appLariat's generic image builder for Websphere. This is the default build confi
 
 Default build workflow:
 
-Component builder starts with a task to create a Websphere image and then dynamically retrieves this repository.
+1. Component builder starts with a task to create a websphere image and then dynamically retrieves this repository.
+2. Component builder updates the FROM image based on the component configuration to pull the proper version of the websphere image.
+3. Component builder retrieves and prepares the specified code artifact.
+4. Component builder executes a Docker Build to generate an image
+    - Pulls the proper official websphere image as the base image layer
+    - Copies the build.sh and entrypoint.sh into the image
+    - Copies the conf/ directory which includes server.xml file into image.
+    - Copies the code artifact into the image
+    - Executes the build.sh script to prepare the image to run.
+5. Component builder pushes the generated image to a designated container repository
 
-Component builder updates the FROM image based on configuration information provided at startup.
+# How to customize websphere component setup
+1. If you only need customize the websphere configuration files, the build.sh script will automatically look for a directory in the code artifact called websphere-conf, in which case it will overwrite the default configuration files
 
-Component builder pulls down the specified code artifact.
- 
-The docker build command is executed via the docker api, which process the Dockerfile:
-
-- Pulls the proper official Websphere image as the base image layer
-- Copies the build.sh and entrypoint.sh into the image
-- Copies the code artifact into the image
-- Executes the build.sh script to prepare the image to run When the docker build process is completed, component builder pushes the image into the cluster's local image repository
+2. Clone this repository to modify and then update the build artifact in your application component configuration within appLariat to use your own customized builder.
+    - Simplest option is to modify the build.sh and entrypoint.sh scripts to prepare and customize the image. 
+      - build.sh runs once during the docker build process. It can be used to install software packages into image.
+      - entrypoint.sh runs every time that image starts and can be utilized to prepare run time environmet like exporting environment variables, setting the PATH etc.
+  
+    - Alternatively you can also modify the Dockerfile and use Docker syntax to build your own customized image. If you create your own Dockerfile you will also need to update the image artifact in appLariat as component builder will override the FROM line in the Dockerfile with the image specified in the config.

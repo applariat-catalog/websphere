@@ -2,6 +2,6 @@
 # appLariat generic tomcat entrypoint.sh
 
 echo "Printing build log"
-cat /src/build.log
+cat /code/build.log
 
 exec @
