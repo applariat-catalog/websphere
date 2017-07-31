@@ -2,6 +2,6 @@
 # appLariat generic tomcat entrypoint.sh
 
 echo "Printing build log"
-cat /code/build.log
+cat /tmp/build.log
 
-exec @
+exec /opt/ibm/docker/docker-server run defaultServer
